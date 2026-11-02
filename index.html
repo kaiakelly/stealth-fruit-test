@@ -28,14 +28,18 @@
       -webkit-user-select: none;
       user-select: none;
     }
+    /* 2秒解鎖光圈動畫 */
     .unlock-progress-ring {
-      transition: stroke-dashoffset 5s linear;
+      transition: stroke-dashoffset 2s linear;
       stroke-dasharray: 283;
       stroke-dashoffset: 283;
     }
     .unlocking .unlock-progress-ring {
       stroke-dashoffset: 0;
     }
+    /* 隱藏原生滾動條但保持滑動 */
+    .scrollbar-none::-webkit-scrollbar { display: none; }
+    .scrollbar-none { -ms-overflow-style: none; scrollbar-width: none; }
   </style>
 </head>
 <body class="bg-gray-100 text-gray-800 antialiased touch-stealth selection:bg-none">
@@ -44,15 +48,14 @@
   <!-- LAYER A: 偽裝層 (Daily Fresh Fruit Market) -->
   <!-- ========================================== -->
   <div id="camouflage-layer" class="min-h-screen flex flex-col justify-between transition-opacity duration-500">
-    <!-- 頂部導航 -->
     <header class="bg-emerald-700 text-white shadow-md sticky top-0 z-30">
       <div class="max-w-4xl mx-auto px-4 py-3 flex items-center justify-between">
-        <!-- 手機端長按 5 秒觸控區域 -->
+        <!-- 2秒長按觸控區域 -->
         <div id="stealth-logo-btn" class="relative flex items-center gap-2 cursor-pointer select-none py-1">
           <div class="relative w-11 h-11 flex items-center justify-center bg-white rounded-full text-emerald-800 shadow-inner">
             <span class="text-2xl" id="logo-icon">🍏</span>
             <svg class="absolute inset-0 w-full h-full -rotate-90 pointer-events-none" viewBox="0 0 100 100">
-              <circle cx="50" cy="50" r="45" fill="none" stroke="rgba(245, 158, 11, 0.7)" stroke-width="6" class="unlock-progress-ring" id="progress-ring"/>
+              <circle cx="50" cy="50" r="45" fill="none" stroke="rgba(245, 158, 11, 0.85)" stroke-width="7" class="unlock-progress-ring" id="progress-ring"/>
             </svg>
           </div>
           <div>
@@ -60,14 +63,12 @@
             <p class="text-[10px] text-emerald-200">澳門 / 珠海冷鏈供應鏈 V5.2.0</p>
           </div>
         </div>
-
         <div class="text-xs bg-emerald-800 px-2.5 py-1.5 rounded-full text-emerald-100 border border-emerald-600">
           批發直營模式
         </div>
       </div>
     </header>
 
-    <!-- 水果行情主內容 -->
     <main class="max-w-4xl mx-auto px-4 py-6 flex-grow w-full">
       <div class="bg-white rounded-xl shadow-sm p-4 mb-5 border border-gray-200">
         <div class="flex justify-between items-center border-b pb-3 mb-3">
@@ -97,7 +98,7 @@
       <div class="bg-amber-50 border border-amber-200 rounded-xl p-4 text-xs text-amber-800 leading-relaxed mb-6">
         <p class="font-bold mb-1">📢 批發訂單配送須知：</p>
         <p>1. 本系統僅供已備案之大灣區商超、酒店採購部查看行情。</p>
-        <p>2. 手機端長按左上方「青蘋果」圖標 5 秒可進行內部核驗。</p>
+        <p>2. 手機端長按左上方「青蘋果」圖標 2 秒可進行內部核驗。</p>
       </div>
 
       <div id="desktop-redirect-notice" class="hidden p-4 bg-gray-200 border border-gray-300 rounded-xl text-center text-xs text-gray-600">
@@ -112,11 +113,10 @@
   </div>
 
   <!-- ========================================== -->
-  <!-- LAYER B: 真實業務層 (C2C/B2C 分類市集)      -->
+  <!-- LAYER B: 主市集列表層 (Marketplace)       -->
   <!-- ========================================== -->
   <div id="marketplace-layer" class="hidden min-h-screen bg-slate-900 text-slate-100 pb-24">
-    
-    <!-- 頂部搜索與會員狀態欄 -->
+    <!-- 頂部欄 -->
     <header class="bg-slate-800/95 backdrop-blur-md sticky top-0 z-40 border-b border-slate-700">
       <div class="px-4 py-3 flex items-center justify-between">
         <div class="flex items-center gap-2">
@@ -126,13 +126,10 @@
             <p class="text-[10px] text-slate-400">澳門專區 · 高端對席服務</p>
           </div>
         </div>
-
-        <div class="flex items-center gap-2" id="user-header-actions">
-          <!-- 動態渲染會員狀態或登入按鈕 -->
-        </div>
+        <div class="flex items-center gap-2" id="user-header-actions"></div>
       </div>
 
-      <!-- 分類與標籤過濾 -->
+      <!-- 分類標籤 -->
       <div class="px-4 pb-2.5 flex gap-2 overflow-x-auto text-xs scrollbar-none">
         <button class="px-3 py-1 bg-amber-500 text-slate-950 font-bold rounded-full whitespace-nowrap">全部服務</button>
         <button class="px-3 py-1 bg-slate-700 hover:bg-slate-600 text-slate-200 rounded-full whitespace-nowrap">👑 認證中介</button>
@@ -141,231 +138,267 @@
       </div>
     </header>
 
-    <!-- 提示條 -->
-    <div id="role-status-banner" class="bg-slate-800/80 px-4 py-2 border-b border-slate-700 text-[11px] flex justify-between items-center text-slate-300">
-      <!-- 動態提示用戶當前權限 -->
-    </div>
+    <div id="role-status-banner" class="bg-slate-800/70 px-4 py-2 border-b border-slate-800 text-[11px] flex justify-between items-center text-slate-300"></div>
 
-    <!-- 動態卡片列表容器 -->
-    <main class="max-w-md mx-auto px-3.5 py-4 space-y-4" id="posts-container">
-      <!-- 由 JS 動態渲染卡片列表 -->
+    <!-- 主流內容容器（置頂區 + 分隔線 + 普通區） -->
+    <main class="max-w-md mx-auto px-3.5 py-4" id="main-content-flow">
+      <!-- 置頂列表容器 -->
+      <div id="pinned-posts-container" class="space-y-4"></div>
+
+      <!-- 分隔線 (Divider) -->
+      <div id="posts-divider" class="flex items-center my-6 gap-3">
+        <div class="flex-grow h-[1px] bg-gradient-to-r from-transparent via-slate-700 to-transparent"></div>
+        <span class="text-[11px] font-medium text-slate-500 tracking-wider">全部特約服務</span>
+        <div class="flex-grow h-[1px] bg-gradient-to-r from-transparent via-slate-700 to-transparent"></div>
+      </div>
+
+      <!-- 普通貼列表容器 -->
+      <div id="normal-posts-container" class="space-y-4"></div>
     </main>
 
     <!-- 底部導航欄 -->
     <nav class="fixed bottom-0 left-0 right-0 bg-slate-900/95 backdrop-blur-md border-t border-slate-800 z-40">
       <div class="max-w-md mx-auto grid grid-cols-4 py-2 text-center text-[10px] text-slate-400">
-        <button class="text-amber-400 font-bold flex flex-col items-center gap-0.5">
+        <button class="text-amber-400 font-bold flex flex-col items-center gap-0.5" onclick="scrollToMarketTop()">
           <span class="text-base">🏛️</span>市集
         </button>
         <button class="hover:text-slate-200 flex flex-col items-center gap-0.5" onclick="openPublishModal()">
-          <span class="text-base">📝</span>發布 (100pt)
+          <span class="text-base">📝</span>發布
         </button>
         <button class="hover:text-slate-200 flex flex-col items-center gap-0.5" onclick="openRechargeModal()">
-          <span class="text-base">🪙</span>充值 (USDT)
+          <span class="text-base">🪙</span>充值
         </button>
-        <button class="hover:text-slate-200 flex flex-col items-center gap-0.5" onclick="openAuthModal()">
-          <span class="text-base">👤</span><span id="nav-user-text">我的/登入</span>
+        <button class="hover:text-slate-200 flex flex-col items-center gap-0.5" onclick="openMyCenterModal()">
+          <span class="text-base">👤</span><span id="nav-user-text">我的</span>
         </button>
       </div>
     </nav>
   </div>
 
   <!-- ========================================== -->
-  <!-- MODAL 1: 認證彈窗（登入 / 註冊 / 忘記密碼） -->
+  <!-- LAYER C: 帖子詳情頁 (第 2 頁)               -->
+  <!-- ========================================== -->
+  <div id="detail-page-layer" class="hidden min-h-screen bg-slate-900 text-slate-100 pb-28">
+    <header class="bg-slate-800/95 backdrop-blur-md sticky top-0 z-50 border-b border-slate-700 px-4 py-3 flex items-center justify-between">
+      <button onclick="closeDetailPage()" class="flex items-center gap-1 text-xs text-amber-400 font-bold">
+        <span>←</span> 返回市集
+      </button>
+      <span class="text-xs font-bold text-slate-300">特約服務詳情</span>
+      <button onclick="toggleFavFromDetail()" id="detail-fav-btn" class="text-base text-slate-400">
+        🤍
+      </button>
+    </header>
+
+    <main class="max-w-md mx-auto px-4 py-4 space-y-4" id="detail-content-body">
+      <!-- 動態載入詳情內容 -->
+    </main>
+
+    <!-- 詳情頁底部固定聯絡工具列 -->
+    <div class="fixed bottom-0 left-0 right-0 bg-slate-900/95 backdrop-blur-md border-t border-slate-800 p-3 z-50">
+      <div class="max-w-md mx-auto flex items-center gap-2" id="detail-fixed-actions">
+        <!-- 動態聯絡按鈕 -->
+      </div>
+    </div>
+  </div>
+
+  <!-- ========================================== -->
+  <!-- MODAL: 「我的」中心（時效監控在右下角查看）  -->
+  <!-- ========================================== -->
+  <div id="mycenter-modal" class="hidden fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-end sm:items-center justify-center p-0 sm:p-4">
+    <div class="bg-slate-800 border-t sm:border border-slate-700 rounded-t-2xl sm:rounded-2xl w-full max-w-md p-5 max-h-[85vh] overflow-y-auto">
+      <div class="flex justify-between items-center border-b border-slate-700 pb-3 mb-4">
+        <h3 class="text-base font-bold text-white flex items-center gap-1.5">
+          <span>👤</span> 個人管理中心
+        </h3>
+        <button onclick="closeMyCenterModal()" class="text-slate-400 hover:text-white text-lg">✕</button>
+      </div>
+
+      <!-- 用戶摘要卡 -->
+      <div id="my-profile-summary" class="bg-slate-900 p-3.5 rounded-xl border border-slate-700 mb-4 text-xs">
+        <!-- JS 動態填入 -->
+      </div>
+
+      <!-- 我的發布與時限監控 (剩餘時長專區) -->
+      <div class="mb-5">
+        <div class="flex justify-between items-center mb-2">
+          <span class="text-xs font-bold text-amber-300">⏳ 我的特約時效監控</span>
+          <span class="text-[10px] text-slate-400">嚴格 120H 倒數生命週期</span>
+        </div>
+        <div id="my-active-posts-list" class="space-y-2.5">
+          <!-- 動態載入我的貼文剩餘小時 -->
+        </div>
+      </div>
+
+      <!-- 快速快捷按鈕 -->
+      <div class="grid grid-cols-2 gap-2 text-xs">
+        <button onclick="closeMyCenterModal(); openRechargeModal();" class="py-2.5 bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold rounded-lg text-center">
+          🪙 點數儲值 (USDT)
+        </button>
+        <button onclick="handleLogout()" class="py-2.5 bg-slate-700 hover:bg-slate-600 text-slate-200 font-bold rounded-lg text-center">
+          安全登出
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========================================== -->
+  <!-- MODAL: 登入 / 註冊 / 忘記密碼               -->
   <!-- ========================================== -->
   <div id="auth-modal" class="hidden fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
     <div class="bg-slate-800 border border-slate-700 rounded-2xl w-full max-w-sm p-5 shadow-2xl relative">
       <button onclick="closeAuthModal()" class="absolute top-3 right-3 text-slate-400 hover:text-white text-lg">✕</button>
-      
-      <!-- 標籤切換 -->
       <div class="flex border-b border-slate-700 mb-4 pb-2 text-sm font-bold">
         <button id="tab-login-btn" onclick="switchAuthTab('login')" class="flex-1 pb-1 text-amber-400 border-b-2 border-amber-400">登入</button>
         <button id="tab-register-btn" onclick="switchAuthTab('register')" class="flex-1 pb-1 text-slate-400">註冊賬號</button>
         <button id="tab-forgot-btn" onclick="switchAuthTab('forgot')" class="flex-1 pb-1 text-slate-400">忘記密碼</button>
       </div>
 
-      <!-- 快速填入測試賬號小幫手 -->
       <div id="quick-login-hints" class="bg-slate-900/60 p-2.5 rounded-lg border border-slate-700/60 mb-3 text-[11px] text-slate-400">
-        <p class="font-bold text-amber-300 mb-1">⚡ 測試快捷鍵（點擊直接填入）：</p>
+        <p class="font-bold text-amber-300 mb-1">⚡ 測試賬號快捷鍵（點擊填入）：</p>
         <div class="flex gap-1.5 flex-wrap">
-          <button onclick="fillTestAccount('demo_agency', '12345678')" class="bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 px-2 py-0.5 rounded border border-amber-500/30">中介 (1000pt)</button>
-          <button onclick="fillTestAccount('demo_pro', '12345678')" class="bg-blue-500/20 hover:bg-blue-500/30 text-blue-300 px-2 py-0.5 rounded border border-blue-500/30">職人 (300pt)</button>
-          <button onclick="fillTestAccount('demo_vip', '12345678')" class="bg-purple-500/20 hover:bg-purple-500/30 text-purple-300 px-2 py-0.5 rounded border border-purple-500/30">鑑賞家 VIP</button>
+          <button onclick="fillTestAccount('demo_agency', '12345678')" class="bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 px-2 py-0.5 rounded border border-amber-500/30">認證中介</button>
+          <button onclick="fillTestAccount('demo_pro', '12345678')" class="bg-blue-500/20 hover:bg-blue-500/30 text-blue-300 px-2 py-0.5 rounded border border-blue-500/30">獨立職人</button>
         </div>
       </div>
 
-      <!-- 表單 A: 登入 -->
       <form id="form-login" onsubmit="handleLoginSubmit(event)" class="space-y-3">
         <div>
           <label class="block text-xs text-slate-300 mb-1">用戶名稱</label>
-          <input type="text" id="login-username" required class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-amber-500">
+          <input type="text" id="login-username" required class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-sm text-white">
         </div>
         <div>
           <label class="block text-xs text-slate-300 mb-1">登入密碼</label>
-          <input type="password" id="login-password" required class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-amber-500">
+          <input type="password" id="login-password" required class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-sm text-white">
         </div>
         <button type="submit" class="w-full bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold py-2.5 rounded-lg text-sm transition">
           立即登入
         </button>
       </form>
 
-      <!-- 表單 B: 註冊 -->
       <form id="form-register" onsubmit="handleRegisterSubmit(event)" class="hidden space-y-2.5 text-xs">
         <div>
           <label class="block text-slate-300 mb-1">用戶名稱 (唯一)</label>
-          <input type="text" id="reg-username" required placeholder="英文字母或數字" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-1.5 text-white">
+          <input type="text" id="reg-username" required class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-1.5 text-white">
         </div>
         <div>
           <label class="block text-slate-300 mb-1">登入密碼 (>=8位)</label>
-          <input type="password" id="reg-password" minlength="8" required placeholder="8位以上安全密碼" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-1.5 text-white">
+          <input type="password" id="reg-password" minlength="8" required class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-1.5 text-white">
         </div>
         <div>
-          <label class="block text-slate-300 mb-1">會員階級 (User Tier)</label>
+          <label class="block text-slate-300 mb-1">會員階級</label>
           <select id="reg-role" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-2 py-1.5 text-white">
-            <option value="Explorer">探索者 (消費者 · 贈送 100 點數)</option>
-            <option value="Connoisseur">鑑賞家 VIP (高級消費者 · 贈送 300 點數)</option>
-            <option value="IndependentPro">獨立職人 (限發1帖 · 贈送 200 點數)</option>
-            <option value="Agency">認證中介 (無限發帖 · 贈送 500 點數)</option>
+            <option value="Explorer">探索者 (消費者 · 贈100pt)</option>
+            <option value="Connoisseur">鑑賞家 VIP (贈300pt)</option>
+            <option value="IndependentPro">獨立職人 (限發1帖 · 贈200pt)</option>
+            <option value="Agency">認證中介 (無限發帖 · 贈500pt)</option>
           </select>
         </div>
         <div>
-          <label class="block text-slate-300 mb-1">安全問題 (雙軌找回密碼)</label>
+          <label class="block text-slate-300 mb-1">安全問題</label>
           <select id="reg-sec-question" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-2 py-1.5 text-white">
             <option value="q1">你母親的姓名是什麼？</option>
             <option value="q2">你出生的小學名稱？</option>
             <option value="q3">你最喜愛的旅遊城市？</option>
-            <option value="q4">你的童年綽號？</option>
           </select>
         </div>
         <div>
-          <input type="text" id="reg-sec-answer" required placeholder="安全問題答案 (請牢記)" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-1.5 text-white">
-        </div>
-        <div>
-          <label class="block text-slate-300 mb-1">防機器人驗證碼</label>
-          <div class="flex gap-2">
-            <input type="text" id="reg-captcha-input" required placeholder="輸入右側數字" class="flex-1 bg-slate-900 border border-slate-700 rounded-lg px-3 py-1 text-white">
-            <span id="reg-captcha-display" class="bg-slate-700 font-mono text-amber-300 font-bold px-3 py-1.5 rounded tracking-widest text-sm select-none">8821</span>
-          </div>
+          <input type="text" id="reg-sec-answer" required placeholder="安全問題答案" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-1.5 text-white">
         </div>
         <button type="submit" class="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-bold py-2 rounded-lg text-sm mt-2 transition">
           建立賬號並登入
         </button>
       </form>
 
-      <!-- 表單 C: 安全問題重置密碼 (Track B) -->
       <form id="form-forgot" onsubmit="handleForgotSubmit(event)" class="hidden space-y-2.5 text-xs">
-        <p class="text-[11px] text-slate-400">雙軌安全重置：無須郵箱，驗證安全問題答案即可直接重設密碼。</p>
+        <p class="text-[11px] text-slate-400">免郵箱：驗證安全答案直接重置密碼。</p>
         <div>
-          <label class="block text-slate-300 mb-1">要重置的用戶名稱</label>
+          <label class="block text-slate-300 mb-1">用戶名稱</label>
           <input type="text" id="forgot-username" required class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-1.5 text-white">
         </div>
         <div>
-          <label class="block text-slate-300 mb-1">安全問題答案</label>
-          <input type="text" id="forgot-answer" required placeholder="輸入註冊時填寫的安全答案" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-1.5 text-white">
+          <label class="block text-slate-300 mb-1">安全答案</label>
+          <input type="text" id="forgot-answer" required class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-1.5 text-white">
         </div>
         <div>
-          <label class="block text-slate-300 mb-1">設定新密碼 (>=8位)</label>
+          <label class="block text-slate-300 mb-1">新密碼 (>=8位)</label>
           <input type="password" id="forgot-newpass" minlength="8" required class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-1.5 text-white">
         </div>
-        <button type="submit" class="w-full bg-amber-600 hover:bg-amber-500 text-white font-bold py-2 rounded-lg text-sm mt-1 transition">
-          核驗並重設密碼
+        <button type="submit" class="w-full bg-amber-600 hover:bg-amber-500 text-white font-bold py-2 rounded-lg text-sm transition">
+          重設密碼
         </button>
       </form>
     </div>
   </div>
 
   <!-- ========================================== -->
-  <!-- MODAL 2: 點數充值彈窗 (USDT TRC-20 模擬)    -->
+  <!-- MODAL: 充值 / 發布                         -->
   <!-- ========================================== -->
   <div id="recharge-modal" class="hidden fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
     <div class="bg-slate-800 border border-slate-700 rounded-2xl w-full max-w-sm p-5 shadow-2xl relative text-xs">
       <button onclick="closeRechargeModal()" class="absolute top-3 right-3 text-slate-400 hover:text-white text-lg">✕</button>
-      <h3 class="text-sm font-bold text-amber-300 mb-1 flex items-center gap-1.5">
-        <span>🪙</span> USDT (TRC-20) 快速儲值
-      </h3>
-      <p class="text-slate-400 mb-3 text-[11px]">1 點數 = 1 HKD/MOP。波場網絡即時到賬。</p>
-
+      <h3 class="text-sm font-bold text-amber-300 mb-1">🪙 USDT (TRC-20) 快速儲值</h3>
+      <p class="text-slate-400 mb-3 text-[11px]">1 點數 = 1 HKD/MOP。點擊直接模擬充值：</p>
       <div class="space-y-2">
         <button onclick="simulateRecharge(15, 125)" class="w-full bg-slate-900 hover:bg-slate-700 p-2.5 rounded-lg border border-slate-700 flex justify-between items-center text-left">
-          <div>
-            <p class="font-bold text-white">15 USDT 體驗包</p>
-            <p class="text-[10px] text-slate-400">獲得 125 點數 (含+25贈送)</p>
-          </div>
-          <span class="text-amber-400 font-bold">+125 pt</span>
+          <span>15 USDT 體驗包 (+25贈送)</span><span class="text-amber-400 font-bold">+125 pt</span>
         </button>
-
         <button onclick="simulateRecharge(35, 300)" class="w-full bg-slate-900 hover:bg-slate-700 p-2.5 rounded-lg border border-amber-500/40 flex justify-between items-center text-left">
-          <div>
-            <p class="font-bold text-white">35 USDT 標準包</p>
-            <p class="text-[10px] text-slate-400">獲得 300 點數 (贈送+50)</p>
-          </div>
-          <span class="text-amber-400 font-bold">+300 pt</span>
-        </button>
-
-        <button onclick="simulateRecharge(65, 550)" class="w-full bg-slate-900 hover:bg-slate-700 p-2.5 rounded-lg border border-slate-700 flex justify-between items-center text-left">
-          <div>
-            <p class="font-bold text-white">65 USDT 尊尚包</p>
-            <p class="text-[10px] text-slate-400">獲得 550 點數 (贈送+100)</p>
-          </div>
-          <span class="text-amber-400 font-bold">+550 pt</span>
+          <span>35 USDT 標準包 (+50贈送)</span><span class="text-amber-400 font-bold">+300 pt</span>
         </button>
       </div>
-
-      <p class="text-[10px] text-slate-500 mt-4 text-center">測試環境：點擊套餐即可直接模擬完成錢包充值並增加點數。</p>
     </div>
   </div>
 
-  <!-- ========================================== -->
-  <!-- MODAL 3: 職人/中介 發布帖子彈窗            -->
-  <!-- ========================================== -->
   <div id="publish-modal" class="hidden fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
     <div class="bg-slate-800 border border-slate-700 rounded-2xl w-full max-w-sm p-5 shadow-2xl relative text-xs">
       <button onclick="closePublishModal()" class="absolute top-3 right-3 text-slate-400 hover:text-white text-lg">✕</button>
-      <h3 class="text-sm font-bold text-white mb-1">📝 發布新服務特約</h3>
-      <p class="text-slate-400 text-[11px] mb-3">扣除 <span class="text-amber-400 font-bold">100 點數</span>，有效期 120 小時。</p>
-
+      <h3 class="text-sm font-bold text-white mb-1">📝 發布新特約</h3>
+      <p class="text-slate-400 text-[11px] mb-3">扣除 100 點數，有效期 120 小時。</p>
       <form onsubmit="handlePublishSubmit(event)" class="space-y-2.5">
         <div>
-          <label class="block text-slate-300 mb-1">服務標題</label>
-          <input type="text" id="pub-title" required placeholder="例如：高端商務陪同 / 私廚品酒" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-1.5 text-white">
+          <label class="block text-slate-300 mb-1">特約標題</label>
+          <input type="text" id="pub-title" required class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-1.5 text-white">
+        </div>
+        <div>
+          <label class="block text-slate-300 mb-1">描述</label>
+          <textarea id="pub-desc" rows="2" required class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-1.5 text-white"></textarea>
         </div>
         <div class="grid grid-cols-2 gap-2">
           <div>
-            <label class="block text-slate-300 mb-1">地區</label>
-            <input type="text" id="pub-location" required placeholder="如：澳門皇朝區" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-1.5 text-white">
+            <label class="block text-slate-300 mb-1">預算</label>
+            <input type="text" id="pub-price" required placeholder="如：2,500 MOP" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-1.5 text-white">
           </div>
           <div>
-            <label class="block text-slate-300 mb-1">參考預算</label>
-            <input type="text" id="pub-price" required placeholder="如：2,000 MOP" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-1.5 text-white">
+            <label class="block text-slate-300 mb-1">地點</label>
+            <input type="text" id="pub-location" required placeholder="如：澳門皇朝區" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-1.5 text-white">
           </div>
         </div>
-        <div>
-          <label class="block text-slate-300 mb-1">聯絡電話 (自動對訪客掩碼)</label>
-          <input type="text" id="pub-phone" required placeholder="+853 66881234" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-1.5 text-white">
+        <div class="grid grid-cols-2 gap-2">
+          <div>
+            <label class="block text-slate-300 mb-1">電話</label>
+            <input type="text" id="pub-phone" required placeholder="+853 66881234" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-1.5 text-white">
+          </div>
+          <div>
+            <label class="block text-slate-300 mb-1">Telegram</label>
+            <input type="text" id="pub-tg" required placeholder="@vip88" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-1.5 text-white">
+          </div>
         </div>
-        <div>
-          <label class="block text-slate-300 mb-1">Telegram Handle</label>
-          <input type="text" id="pub-tg" required placeholder="@vip_service" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-1.5 text-white">
-        </div>
-        <button type="submit" class="w-full bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold py-2.5 rounded-lg text-sm mt-2 transition">
-          確認扣除 100pt 並發布
+        <button type="submit" class="w-full bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold py-2 rounded-lg text-sm mt-2 transition">
+          發布特約
         </button>
       </form>
     </div>
   </div>
 
   <!-- ========================================== -->
-  <!-- JAVASCRIPT: 雙層偽裝 + 本地 Auth 與業務引擎 -->
+  <!-- JAVASCRIPT: 核心引擎                       -->
   <!-- ========================================== -->
   <script>
     (function () {
       'use strict';
 
-      // 註冊 Service Worker
       if ('serviceWorker' in navigator) {
-        navigator.serviceWorker.register('./sw.js').catch(err => {
-          console.warn('SW registration skipped:', err);
-        });
+        navigator.serviceWorker.register('./sw.js').catch(()=>{});
       }
 
       const camoLayer = document.getElementById('camouflage-layer');
@@ -373,28 +406,26 @@
       const stealthLogoBtn = document.getElementById('stealth-logo-btn');
       let pressTimer = null;
       let idleTimer = null;
-      const PRESS_DURATION = 5000;
+
+      // 核心配置：改為 2 秒 (2000ms)
+      const PRESS_DURATION = 2000;
       const IDLE_TIMEOUT_MS = 10 * 60 * 1000;
 
-      // 1. 桌面端檢測 (Desktop 檢測與跳轉)
+      // 桌面端檢測跳轉
       const isDesktop = () => {
-        const isWideScreen = window.innerWidth > 768;
-        const isDesktopAgent = !/Android|iPhone|iPad|iPod|Mobile/i.test(navigator.userAgent);
-        return isWideScreen && isDesktopAgent;
+        return (window.innerWidth > 768) && !/Android|iPhone|iPad|iPod|Mobile/i.test(navigator.userAgent);
       };
 
       if (isDesktop()) {
         document.getElementById('desktop-redirect-notice').classList.remove('hidden');
-        document.getElementById('platform-hint').textContent = '為了獲得最佳瀏覽體驗，本採購系統專為移動設備優化。請使用智能手機訪問。';
         document.addEventListener('click', function (e) {
           e.preventDefault();
-          e.stopPropagation();
           window.location.href = 'https://www.taobao.com';
         }, true);
         return;
       }
 
-      // 2. 手機端長按 5 秒解鎖
+      // 2秒長按觸發
       function triggerUnlock() {
         if ('vibrate' in navigator) {
           try { navigator.vibrate(200); } catch (e) {}
@@ -406,13 +437,14 @@
           marketLayer.classList.remove('hidden');
           window.scrollTo(0, 0);
           resetIdleTimer();
-          window.initMarketplaceEngine();
-        }, 500);
+          window.initMarketplace();
+        }, 400);
       }
 
       window.lockApp = function() {
         sessionStorage.removeItem('stealth_unlocked');
         marketLayer.classList.add('hidden');
+        document.getElementById('detail-page-layer').classList.add('hidden');
         camoLayer.classList.remove('hidden');
         camoLayer.classList.remove('opacity-0');
         clearTimeout(idleTimer);
@@ -440,7 +472,7 @@
       stealthLogoBtn.addEventListener('pointercancel', cancelPress);
       stealthLogoBtn.addEventListener('pointerleave', cancelPress);
 
-      // 3. 自動回鎖防窺 (切換後台/鎖屏/10分鐘閒置)
+      // 防窺自動回鎖
       document.addEventListener('visibilitychange', () => {
         if (document.hidden) window.lockApp();
       });
@@ -449,9 +481,7 @@
       function resetIdleTimer() {
         clearTimeout(idleTimer);
         if (sessionStorage.getItem('stealth_unlocked') === 'true') {
-          idleTimer = setTimeout(() => {
-            window.lockApp();
-          }, IDLE_TIMEOUT_MS);
+          idleTimer = setTimeout(() => window.lockApp(), IDLE_TIMEOUT_MS);
         }
       }
 
@@ -466,13 +496,12 @@
       }
     })();
 
-    // ============================================================
-    // MOCK AUTH & MARKETPLACE BUSINESS ENGINE (本地會員與業務引擎)
-    // ============================================================
+    // ==========================================
+    // 業務與數據引擎
+    // ==========================================
     const DEFAULT_USERS = [
       { username: 'demo_agency', password: '12345678', role: 'Agency', points: 1000, secQ: 'q1', secA: '陳媽媽' },
-      { username: 'demo_pro', password: '12345678', role: 'IndependentPro', points: 300, secQ: 'q3', secA: '澳門' },
-      { username: 'demo_vip', password: '12345678', role: 'Connoisseur', points: 500, secQ: 'q2', secA: '培正中學' }
+      { username: 'demo_pro', password: '12345678', role: 'IndependentPro', points: 300, secQ: 'q3', secA: '澳門' }
     ];
 
     const DEFAULT_POSTS = [
@@ -480,73 +509,89 @@
         id: 'post_1',
         author: 'demo_agency',
         role: 'Agency',
-        title: '皇朝會所 · 私人管家定製接待 (認證中介)',
-        desc: '五星商務陪同、商務應酬、各國佳麗資質核實保真。',
+        title: '皇朝私人會所 · 商務定製接待 (尊尚隨行)',
+        desc: '五星商務陪同，嚴選各國佳麗資質核實保真。可開正規商務報銷憑證，支持各類商務宴請。',
+        budget: '2,500 MOP',
         location: '澳門皇朝區',
-        price: '2,500 MOP',
         phone: '+853 66881122',
         tg: '@macau_club88',
         remainingHours: 118,
+        createdAt: Date.now() - 3600000 * 2,
         isPinned: true,
-        lastBumpedAt: Date.now()
+        lastBumpedAt: Date.now(),
+        media: [
+          { type: 'video', thumb: 'https://images.unsplash.com/photo-1541532713592-79a0317b6b77?w=300&q=80', dur: '0:18' },
+          { type: 'img', thumb: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=300&q=80' },
+          { type: 'img', thumb: 'https://images.unsplash.com/photo-1517841905240-472988babdf9?w=300&q=80' },
+          { type: 'img', thumb: 'https://images.unsplash.com/photo-1524504388940-b1c1722653e1?w=300&q=80' },
+          { type: 'img', thumb: 'https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=300&q=80' }
+        ]
       },
       {
         id: 'post_2',
         author: 'demo_pro',
         role: 'IndependentPro',
-        title: '日籍調酒師 & 私人伴行 (獨立職人)',
-        desc: '廣東話/英語/日語流利，專注個人伴行與高空酒廊品鑒。配額嚴格 1 帖。',
+        title: '日籍調酒師 & 私人品酒伴遊 (個人純職人)',
+        desc: '粵英日三語流利，專注個人伴行與高空酒廊品鑒，親和力滿分。純個人預約，無中介抽成。',
+        budget: '1,800 MOP',
         location: '氹仔新濠天地週邊',
-        price: '1,800 MOP',
         phone: '+853 62339900',
         tg: '@cocktail_pro',
         remainingHours: 42,
+        createdAt: Date.now() - 3600000 * 5,
         isPinned: false,
-        lastBumpedAt: Date.now() - 3600000
+        lastBumpedAt: Date.now() - 3600000,
+        media: [
+          { type: 'video', thumb: 'https://images.unsplash.com/photo-1514362545857-3bc16c4c7d1b?w=300&q=80', dur: '0:22' },
+          { type: 'img', thumb: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=300&q=80' },
+          { type: 'img', thumb: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=300&q=80' },
+          { type: 'img', thumb: 'https://images.unsplash.com/photo-1492562080023-ab3db95bfbce?w=300&q=80' }
+        ]
       }
     ];
 
-    // 初始化 LocalStorage 數據庫
-    function initDatabase() {
-      if (!localStorage.getItem('mock_users')) {
-        localStorage.setItem('mock_users', JSON.stringify(DEFAULT_USERS));
-      }
-      if (!localStorage.getItem('mock_posts')) {
-        localStorage.setItem('mock_posts', JSON.stringify(DEFAULT_POSTS));
-      }
+    function initDb() {
+      if (!localStorage.getItem('mock_users')) localStorage.setItem('mock_users', JSON.stringify(DEFAULT_USERS));
+      if (!localStorage.getItem('mock_posts')) localStorage.setItem('mock_posts', JSON.stringify(DEFAULT_POSTS));
+      if (!localStorage.getItem('mock_favs')) localStorage.setItem('mock_favs', JSON.stringify([]));
     }
 
     function getUsers() { return JSON.parse(localStorage.getItem('mock_users') || '[]'); }
     function saveUsers(u) { localStorage.setItem('mock_users', JSON.stringify(u)); }
     function getPosts() { return JSON.parse(localStorage.getItem('mock_posts') || '[]'); }
     function savePosts(p) { localStorage.setItem('mock_posts', JSON.stringify(p)); }
+    function getFavs() { return JSON.parse(localStorage.getItem('mock_favs') || '[]'); }
+    function saveFavs(f) { localStorage.setItem('mock_favs', JSON.stringify(f)); }
 
     function getCurrentUser() {
       const u = sessionStorage.getItem('current_user');
       return u ? JSON.parse(u) : null;
     }
-
     function setCurrentUser(u) {
       if (u) {
         sessionStorage.setItem('current_user', JSON.stringify(u));
-        // 同步更新 mock_users 中的點數
         const users = getUsers();
-        const idx = users.findIndex(x => x.username === u.username);
-        if (idx !== -1) {
-          users[idx] = u;
-          saveUsers(users);
-        }
+        const i = users.findIndex(x => x.username === u.username);
+        if (i !== -1) { users[i] = u; saveUsers(users); }
       } else {
         sessionStorage.removeItem('current_user');
       }
     }
 
-    window.initMarketplaceEngine = function() {
-      initDatabase();
-      renderUI();
+    function formatTimeAgo(ts) {
+      const diff = Math.floor((Date.now() - ts) / 1000);
+      if (diff < 60) return '剛剛';
+      if (diff < 3600) return `${Math.floor(diff/60)}分鐘前`;
+      if (diff < 86400) return `${Math.floor(diff/3600)}小時前`;
+      return `${Math.floor(diff/86400)}天前`;
+    }
+
+    window.initMarketplace = function() {
+      initDb();
+      renderMarketUI();
     };
 
-    function renderUI() {
+    function renderMarketUI() {
       const user = getCurrentUser();
       const headerActions = document.getElementById('user-header-actions');
       const banner = document.getElementById('role-status-banner');
@@ -555,278 +600,445 @@
       if (!user) {
         headerActions.innerHTML = `
           <button onclick="openAuthModal()" class="px-2.5 py-1 bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold text-xs rounded transition">
-            登入 / 註冊
+            登入
           </button>
           <button onclick="window.lockApp()" class="p-1 bg-slate-700 text-slate-300 rounded text-xs">🔒</button>
         `;
         banner.innerHTML = `
-          <span>👤 模式：<b class="text-amber-400">訪客</b>（聯絡方式已掩碼保護）</span>
-          <span class="text-slate-400">登入後解鎖直通</span>
+          <span>👤 模式：<b class="text-amber-400">訪客</b>（聯絡方式掩碼保護）</span>
+          <span class="text-slate-400">登入後解鎖電話/TG</span>
         `;
-        navUserText.textContent = '登入/註冊';
+        navUserText.textContent = '我的';
       } else {
         headerActions.innerHTML = `
           <div class="bg-slate-700/80 border border-slate-600 px-2 py-0.5 rounded text-[11px] text-amber-300 flex items-center gap-1 cursor-pointer" onclick="openRechargeModal()">
             <span>🪙</span><span class="font-bold">${user.points} pt</span>
           </div>
-          <button onclick="handleLogout()" class="px-2 py-1 bg-slate-700 hover:bg-slate-600 text-slate-200 text-[10px] rounded">
-            登出
+          <button onclick="openMyCenterModal()" class="px-2 py-1 bg-slate-700 hover:bg-slate-600 text-slate-200 text-[10px] rounded">
+            中心
           </button>
           <button onclick="window.lockApp()" class="p-1 bg-slate-700 text-slate-300 rounded text-xs">🔒</button>
         `;
         banner.innerHTML = `
-          <span>身份：<b class="text-amber-300">${user.username}</b> (${getRoleName(user.role)})</span>
-          <span class="text-emerald-400">已解鎖明文通訊</span>
+          <span>已登入：<b class="text-amber-300">${user.username}</b></span>
+          <span class="text-emerald-400 font-medium">已解鎖直聯</span>
         `;
         navUserText.textContent = user.username;
       }
 
-      renderPosts();
+      renderSplitPosts();
     }
 
-    function getRoleName(role) {
-      switch(role) {
-        case 'Agency': return '👑 認證中介';
-        case 'IndependentPro': return '💎 獨立職人';
-        case 'Connoisseur': return '🍷 鑑賞家 VIP';
-        default: return '🧭 探索者';
-      }
-    }
-
-    function renderPosts() {
-      const postsContainer = document.getElementById('posts-container');
+    // 渲染卡片：嚴格按照指定佈局
+    function renderSplitPosts() {
+      const pinnedContainer = document.getElementById('pinned-posts-container');
+      const normalContainer = document.getElementById('normal-posts-container');
+      const divider = document.getElementById('posts-divider');
       const posts = getPosts();
-      const currentUser = getCurrentUser();
 
-      // 排序公式：isPinned DESC, lastBumpedAt DESC
-      posts.sort((a, b) => {
-        if (b.isPinned !== a.isPinned) return b.isPinned ? 1 : -1;
-        return (b.lastBumpedAt || 0) - (a.lastBumpedAt || 0);
-      });
+      const pinned = posts.filter(p => p.isPinned);
+      const normal = posts.filter(p => !p.isPinned);
 
-      postsContainer.innerHTML = posts.map(post => {
-        const isAgency = post.role === 'Agency';
+      // 排序：按最後推上時間排序
+      pinned.sort((a,b) => (b.lastBumpedAt||0) - (a.lastBumpedAt||0));
+      normal.sort((a,b) => (b.lastBumpedAt||0) - (a.lastBumpedAt||0));
+
+      divider.style.display = (pinned.length > 0 && normal.length > 0) ? 'flex' : 'none';
+
+      pinnedContainer.innerHTML = pinned.map(p => createCardHtml(p, true)).join('');
+      normalContainer.innerHTML = normal.map(p => createCardHtml(p, false)).join('');
+    }
+
+    function createCardHtml(post, isPinned) {
+      const user = getCurrentUser();
+      const favs = getFavs();
+      const isFav = favs.includes(post.id);
+      const isAgency = post.role === 'Agency';
+
+      // 媒體橫排（第4個起滑動）
+      const mediaHtml = (post.media || []).map(m => {
+        if (m.type === 'video') {
+          return `
+            <div class="relative w-20 h-20 rounded-lg overflow-hidden flex-shrink-0 bg-slate-950 border border-slate-700">
+              <img src="${m.thumb}" class="w-full h-full object-cover opacity-80" loading="lazy">
+              <span class="absolute bottom-1 right-1 bg-black/70 text-amber-400 text-[9px] px-1 rounded font-mono font-bold">▶ ${m.dur}</span>
+            </div>
+          `;
+        }
         return `
-          <article class="bg-slate-800 rounded-xl border ${post.isPinned ? 'border-amber-500/60 shadow-amber-500/10' : 'border-slate-700'} p-4 shadow-lg relative overflow-hidden">
-            ${post.isPinned ? `
-              <div class="absolute top-0 right-0 bg-gradient-to-l from-amber-500 to-amber-600 text-slate-950 font-black text-[10px] px-3 py-0.5 rounded-bl-lg shadow">
-                置頂中 · 24H
-              </div>
-            ` : ''}
-
-            <div class="flex items-start gap-3">
-              <div class="w-13 h-13 rounded-lg bg-slate-700 flex items-center justify-center text-2xl border border-slate-600 flex-shrink-0">
-                ${isAgency ? '👑' : '💎'}
-              </div>
-              <div class="flex-grow">
-                <div class="flex items-center gap-1.5 flex-wrap">
-                  <h2 class="font-bold text-sm text-white">${post.title}</h2>
-                  <span class="${isAgency ? 'bg-amber-500/20 text-amber-400 border border-amber-500/40' : 'bg-blue-500/20 text-blue-400 border border-blue-500/40'} text-[9px] font-bold px-1.5 py-0.2 rounded">
-                    ${isAgency ? '認證中介' : '獨立職人'}
-                  </span>
-                </div>
-                <p class="text-xs text-slate-400 mt-1 line-clamp-1">${post.desc}</p>
-                <div class="mt-2 flex items-center gap-2 text-[11px] text-slate-400">
-                  <span>📍 ${post.location}</span>
-                  <span>•</span>
-                  <span class="text-emerald-400 font-mono">剩餘: ${post.remainingHours}小時</span>
-                </div>
-              </div>
-            </div>
-
-            <!-- 自定義字段 -->
-            <div class="grid grid-cols-2 gap-2 bg-slate-900/60 rounded p-2 mt-3 text-center text-[11px]">
-              <div>
-                <span class="text-slate-500 block">服務預算</span>
-                <span class="text-amber-400 font-bold">${post.price}</span>
-              </div>
-              <div>
-                <span class="text-slate-500 block">發布者</span>
-                <span class="text-slate-300 font-medium">${post.author}</span>
-              </div>
-            </div>
-
-            <!-- 聯絡方式（遮蔽 vs 明文） -->
-            <div class="mt-3 pt-3 border-t border-slate-700/60 flex items-center justify-between text-xs font-mono">
-              <div>
-                ${currentUser ? `
-                  <div class="space-y-0.5">
-                    <p class="text-emerald-400">📞 TEL: <a href="tel:${post.phone}" class="underline font-bold">${post.phone}</a></p>
-                    <p class="text-amber-400">✈️ TG: <a href="https://t.me/${post.tg.replace('@','')}" target="_blank" class="underline font-bold">${post.tg}</a></p>
-                  </div>
-                ` : `
-                  <div class="space-y-0.5 text-slate-400">
-                    <p>📞 TEL: <span class="blur-[4px] select-none">+853 6688****</span></p>
-                    <p>✈️ TG: <span class="blur-[4px] select-none">@macau_****</span></p>
-                  </div>
-                `}
-              </div>
-              
-              <div class="flex gap-1.5">
-                ${!currentUser ? `
-                  <button onclick="openAuthModal()" class="px-2.5 py-1.5 bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold text-xs rounded transition shadow">
-                    登入解鎖
-                  </button>
-                ` : `
-                  <button onclick="bumpPost('${post.id}')" class="px-2 py-1 bg-slate-700 hover:bg-slate-600 text-slate-200 font-bold text-[11px] rounded" title="推上花費 20 點數">
-                    推上 (20pt)
-                  </button>
-                  <button onclick="pinPost('${post.id}')" class="px-2 py-1 bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 border border-amber-500/30 font-bold text-[11px] rounded" title="置頂 24H 花費 50 點數">
-                    置頂 (50pt)
-                  </button>
-                `}
-              </div>
-            </div>
-          </article>
+          <div class="w-20 h-20 rounded-lg overflow-hidden flex-shrink-0 bg-slate-950 border border-slate-700">
+            <img src="${m.thumb}" class="w-full h-full object-cover" loading="lazy">
+          </div>
         `;
       }).join('');
+
+      return `
+        <article class="bg-slate-800 rounded-xl border ${isPinned ? 'border-amber-500/70 shadow-lg shadow-amber-500/10' : 'border-slate-700'} p-3.5 space-y-2.5 relative">
+          ${isPinned ? `
+            <div class="absolute top-0 right-0 bg-gradient-to-l from-amber-500 to-amber-600 text-slate-950 font-black text-[9px] px-2.5 py-0.5 rounded-bl-md shadow">
+              置頂中
+            </div>
+          ` : ''}
+
+          <!-- 1. 媒體滑動列：片｜小圖｜小圖｜小圖 (第4個起滑動) -->
+          <div class="flex gap-2 overflow-x-auto pb-1 scrollbar-none snap-x" onclick="openDetailPage('${post.id}')">
+            ${mediaHtml}
+          </div>
+
+          <!-- 2. 信息行：認證中介。預算。地點。發佈於 -->
+          <div class="flex items-center gap-1.5 text-[11px] flex-wrap" onclick="openDetailPage('${post.id}')">
+            <span class="${isAgency ? 'text-amber-400 font-bold' : 'text-blue-400 font-bold'}">
+              ${isAgency ? '👑 認證中介' : '💎 獨立職人'}
+            </span>
+            <span class="text-slate-600">•</span>
+            <span class="text-amber-300 font-bold">${post.budget}</span>
+            <span class="text-slate-600">•</span>
+            <span class="text-slate-400">${post.location}</span>
+            <span class="text-slate-600">•</span>
+            <span class="text-slate-500 font-mono">發佈於 ${formatTimeAgo(post.createdAt || post.lastBumpedAt)}</span>
+          </div>
+
+          <!-- 3. 標題 -->
+          <h2 class="font-bold text-sm text-white leading-snug cursor-pointer" onclick="openDetailPage('${post.id}')">
+            ${post.title}
+          </h2>
+
+          <!-- 4. 描述 -->
+          <p class="text-xs text-slate-400 line-clamp-2 leading-relaxed cursor-pointer" onclick="openDetailPage('${post.id}')">
+            ${post.desc}
+          </p>
+
+          <!-- 5. 操作行：tel / tg / 推 / 頂 / 藏 (不寫pt) -->
+          <div class="pt-2 border-t border-slate-700/60 flex items-center justify-between gap-1 text-xs">
+            <!-- 聯絡欄 -->
+            <div class="flex items-center gap-2">
+              ${user ? `
+                <a href="tel:${post.phone}" onclick="event.stopPropagation()" class="px-2.5 py-1 bg-emerald-600/30 border border-emerald-500/40 text-emerald-300 rounded font-bold text-[11px] flex items-center gap-1">
+                  📞 TEL
+                </a>
+                <a href="https://t.me/${post.tg.replace('@','')}" target="_blank" onclick="event.stopPropagation()" class="px-2.5 py-1 bg-sky-600/30 border border-sky-500/40 text-sky-300 rounded font-bold text-[11px] flex items-center gap-1">
+                  ✈️ TG
+                </a>
+              ` : `
+                <button onclick="openAuthModal()" class="px-2.5 py-1 bg-slate-700/80 text-slate-400 rounded text-[11px]">
+                  📞 TEL (鎖定)
+                </button>
+                <button onclick="openAuthModal()" class="px-2.5 py-1 bg-slate-700/80 text-slate-400 rounded text-[11px]">
+                  ✈️ TG (鎖定)
+                </button>
+              `}
+            </div>
+
+            <!-- 控制鈕：推 / 頂 / 藏 -->
+            <div class="flex items-center gap-1.5 font-bold">
+              <button onclick="actionBump('${post.id}')" class="px-2 py-1 bg-slate-700 hover:bg-slate-600 text-slate-200 rounded text-[11px]">
+                推
+              </button>
+              <button onclick="actionPin('${post.id}')" class="px-2 py-1 bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 border border-amber-500/30 rounded text-[11px]">
+                頂
+              </button>
+              <button onclick="toggleFav('${post.id}')" class="px-2 py-1 bg-slate-700 hover:bg-slate-600 text-slate-300 rounded text-[11px]">
+                ${isFav ? '❤️ 藏' : '🤍 藏'}
+              </button>
+            </div>
+          </div>
+        </article>
+      `;
     }
 
     // ==========================================
-    // 點數生命週期操作 (推上、置頂、發布、儲值)
+    // 第二頁：帖子詳情頁 (Detail View)
     // ==========================================
+    let currentDetailPostId = null;
 
-    // 推上 (Bump) - 扣 20 點數，重設時鐘為 120 小時
-    window.bumpPost = function(postId) {
+    window.openDetailPage = function(postId) {
+      const posts = getPosts();
+      const p = posts.find(x => x.id === postId);
+      if (!p) return;
+
+      currentDetailPostId = postId;
+      const user = getCurrentUser();
+      const favs = getFavs();
+      const isFav = favs.includes(p.id);
+
+      document.getElementById('detail-fav-btn').textContent = isFav ? '❤️' : '🤍';
+
+      // 詳情大圖輪播排版
+      const mediaBigHtml = (p.media || []).map(m => `
+        <div class="w-full h-56 rounded-xl overflow-hidden bg-slate-950 relative border border-slate-700 flex-shrink-0">
+          <img src="${m.thumb}" class="w-full h-full object-cover">
+          ${m.type === 'video' ? '<span class="absolute inset-0 flex items-center justify-center text-4xl bg-black/40">▶</span>' : ''}
+        </div>
+      `).join('');
+
+      document.getElementById('detail-content-body').innerHTML = `
+        <div class="space-y-3">
+          <!-- 橫向滑動大圖 -->
+          <div class="flex gap-2 overflow-x-auto pb-1 scrollbar-none snap-x">
+            ${mediaBigHtml}
+          </div>
+
+          <!-- 信息行 -->
+          <div class="flex items-center gap-1.5 text-xs">
+            <span class="${p.role === 'Agency' ? 'text-amber-400 font-bold' : 'text-blue-400 font-bold'}">
+              ${p.role === 'Agency' ? '👑 認證中介' : '💎 獨立職人'}
+            </span>
+            <span class="text-slate-600">•</span>
+            <span class="text-amber-300 font-bold text-sm">${p.budget}</span>
+            <span class="text-slate-600">•</span>
+            <span class="text-slate-400">${p.location}</span>
+          </div>
+
+          <!-- 標題 -->
+          <h1 class="text-lg font-black text-white leading-tight">${p.title}</h1>
+
+          <!-- 自定義標籤 -->
+          <div class="flex gap-1.5 flex-wrap text-[10px]">
+            <span class="bg-slate-800 text-slate-300 px-2 py-0.5 rounded border border-slate-700">五星環境</span>
+            <span class="bg-slate-800 text-slate-300 px-2 py-0.5 rounded border border-slate-700">粵英雙語</span>
+            <span class="bg-slate-800 text-slate-300 px-2 py-0.5 rounded border border-slate-700">實名認證</span>
+            <span class="bg-slate-800 text-emerald-400 px-2 py-0.5 rounded border border-emerald-500/30">照片保真度 99%</span>
+          </div>
+
+          <!-- 完整詳述 -->
+          <div class="bg-slate-800/80 p-3.5 rounded-xl border border-slate-700 text-xs text-slate-300 leading-relaxed">
+            <p class="font-bold text-slate-200 mb-1">【服務介紹】</p>
+            <p>${p.desc}</p>
+            <p class="mt-2 text-slate-400">發布者：${p.author} · 發佈於 ${formatTimeAgo(p.createdAt || p.lastBumpedAt)}</p>
+          </div>
+
+          <!-- 社區鑑賞家點評模擬 -->
+          <div class="bg-slate-800/50 p-3 rounded-xl border border-slate-700/60 text-xs">
+            <div class="flex justify-between items-center mb-2">
+              <span class="font-bold text-amber-300">鑑賞家社區評價 (3則)</span>
+              <span class="text-[10px] text-emerald-400">整體好評率 98%</span>
+            </div>
+            <div class="space-y-1.5 text-[11px] text-slate-400">
+              <p>• <b>VIP_Kelvin</b>: 環境高檔，真人與視頻完全相符，值得推！</p>
+              <p>• <b>澳門探索者</b>: 服務態度幾好，已收藏。</p>
+            </div>
+          </div>
+        </div>
+      `;
+
+      // 底部固定操作條
+      const actionsEl = document.getElementById('detail-fixed-actions');
+      if (user) {
+        actionsEl.innerHTML = `
+          <a href="tel:${p.phone}" class="flex-1 py-2.5 bg-emerald-600 hover:bg-emerald-500 text-white font-bold rounded-lg text-center text-xs shadow">
+            📞 立即致電
+          </a>
+          <a href="https://t.me/${p.tg.replace('@','')}" target="_blank" class="flex-1 py-2.5 bg-sky-600 hover:bg-sky-500 text-white font-bold rounded-lg text-center text-xs shadow">
+            ✈️ Telegram
+          </a>
+          <button onclick="actionBump('${p.id}')" class="px-3 py-2.5 bg-slate-700 text-slate-200 font-bold rounded-lg text-xs">推</button>
+          <button onclick="actionPin('${p.id}')" class="px-3 py-2.5 bg-amber-500/20 text-amber-300 border border-amber-500/30 font-bold rounded-lg text-xs">頂</button>
+        `;
+      } else {
+        actionsEl.innerHTML = `
+          <button onclick="openAuthModal()" class="w-full py-2.5 bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold rounded-lg text-center text-xs">
+            登入以查看專屬聯絡方式 (TEL / Telegram)
+          </button>
+        `;
+      }
+
+      document.getElementById('marketplace-layer').classList.add('hidden');
+      document.getElementById('detail-page-layer').classList.remove('hidden');
+      window.scrollTo(0, 0);
+    };
+
+    window.closeDetailPage = function() {
+      document.getElementById('detail-page-layer').classList.add('hidden');
+      document.getElementById('marketplace-layer').classList.remove('hidden');
+    };
+
+    window.toggleFavFromDetail = function() {
+      if (currentDetailPostId) {
+        toggleFav(currentDetailPostId);
+        const isFav = getFavs().includes(currentDetailPostId);
+        document.getElementById('detail-fav-btn').textContent = isFav ? '❤️' : '🤍';
+      }
+    };
+
+    // ==========================================
+    // 右下角「我的」中心：時效查看與控制
+    // ==========================================
+    window.openMyCenterModal = function() {
       const user = getCurrentUser();
       if (!user) return openAuthModal();
-      if (user.points < 20) {
-        alert('點數不足！推上需要 20 點數，請先儲值。');
-        return openRechargeModal();
+
+      document.getElementById('mycenter-modal').classList.remove('hidden');
+
+      // 個人資料摘要
+      document.getElementById('my-profile-summary').innerHTML = `
+        <div class="flex justify-between items-center">
+          <div>
+            <h4 class="font-bold text-white text-sm">${user.username}</h4>
+            <p class="text-slate-400 text-[10px]">${user.role === 'Agency' ? '👑 認證中介 (無限發布)' : '💎 獨立職人 (限1帖)'}</p>
+          </div>
+          <div class="text-right">
+            <span class="text-amber-400 font-bold text-base">${user.points} pt</span>
+            <p class="text-slate-500 text-[9px]">當前可用點數</p>
+          </div>
+        </div>
+      `;
+
+      // 專屬時效清單：剩餘時長在此精準展示
+      const posts = getPosts();
+      const myPosts = posts.filter(p => p.author === user.username);
+      const listEl = document.getElementById('my-active-posts-list');
+
+      if (myPosts.length === 0) {
+        listEl.innerHTML = `<p class="text-slate-500 text-center py-3 text-[11px]">您目前沒有發布中的特約服務</p>`;
+      } else {
+        listEl.innerHTML = myPosts.map(p => `
+          <div class="bg-slate-950 p-2.5 rounded-lg border border-slate-700 text-xs space-y-1.5">
+            <div class="flex justify-between items-center">
+              <span class="font-bold text-white truncate max-w-[180px]">${p.title}</span>
+              <span class="text-emerald-400 font-mono font-bold">剩餘: ${p.remainingHours} 小時</span>
+            </div>
+            <div class="flex justify-between items-center text-[10px] text-slate-400 pt-1 border-t border-slate-800">
+              <span>狀態: ${p.isPinned ? '🌟 置頂中' : '一般在線'}</span>
+              <div class="flex gap-1.5">
+                <button onclick="actionBump('${p.id}'); openMyCenterModal();" class="px-2 py-0.5 bg-slate-700 text-slate-200 rounded font-bold">推上重置</button>
+                <button onclick="actionPin('${p.id}'); openMyCenterModal();" class="px-2 py-0.5 bg-amber-500/20 text-amber-300 rounded font-bold">置頂</button>
+              </div>
+            </div>
+          </div>
+        `).join('');
       }
+    };
+
+    window.closeMyCenterModal = function() {
+      document.getElementById('mycenter-modal').classList.add('hidden');
+    };
+
+    // ==========================================
+    // 動作按鈕：推、頂、藏、儲值、發布
+    // ==========================================
+    window.actionBump = function(id) {
+      const user = getCurrentUser();
+      if (!user) return openAuthModal();
+      if (user.points < 20) return alert('點數不足，推上需扣除 20 點！請先儲值。');
 
       user.points -= 20;
       setCurrentUser(user);
 
       const posts = getPosts();
-      const p = posts.find(x => x.id === postId);
+      const p = posts.find(x => x.id === id);
       if (p) {
-        p.remainingHours = 120;
+        p.remainingHours = 120; // 歸位重置120小時
         p.lastBumpedAt = Date.now();
         savePosts(posts);
       }
-      renderUI();
-      alert(`推上成功！扣除 20 點數，有效期已重置為 120 小時！當前剩餘點數：${user.points}`);
+      renderMarketUI();
+      alert('已成功推上至首頁頂部！扣除 20 點。');
     };
 
-    // 置頂 (Pin) - 扣 50 點數，置頂 24 小時
-    window.pinPost = function(postId) {
+    window.actionPin = function(id) {
       const user = getCurrentUser();
       if (!user) return openAuthModal();
-      if (user.points < 50) {
-        alert('點數不足！置頂需要 50 點數，請先儲值。');
-        return openRechargeModal();
-      }
+      if (user.points < 50) return alert('點數不足，置頂需扣除 50 點！請先儲值。');
 
       const posts = getPosts();
-      const p = posts.find(x => x.id === postId);
+      const p = posts.find(x => x.id === id);
       if (p) {
-        if (p.remainingHours < 24) {
-          return alert('帖子剩餘有效期不足 24 小時，請先「推上」重置時限後再置頂！');
-        }
         user.points -= 50;
         setCurrentUser(user);
         p.isPinned = true;
         savePosts(posts);
       }
-      renderUI();
-      alert(`置頂成功！扣除 50 點數。`);
+      renderMarketUI();
+      alert('已置頂！扣除 50 點。');
     };
 
-    // 模擬 USDT 儲值
-    window.simulateRecharge = function(usdt, points) {
-      const user = getCurrentUser();
-      if (!user) {
-        alert('請先登入後再進行儲值！');
-        closeRechargeModal();
-        return openAuthModal();
+    window.toggleFav = function(id) {
+      const favs = getFavs();
+      const idx = favs.indexOf(id);
+      if (idx > -1) {
+        favs.splice(idx, 1);
+        alert('已取消收藏');
+      } else {
+        favs.push(id);
+        alert('已加入我的收藏');
       }
-      user.points += points;
+      saveFavs(favs);
+      renderMarketUI();
+    };
+
+    window.simulateRecharge = function(usdt, pts) {
+      const user = getCurrentUser();
+      if (!user) return openAuthModal();
+      user.points += pts;
       setCurrentUser(user);
       closeRechargeModal();
-      renderUI();
-      alert(`🎉 模擬支付成功！\n支付：${usdt} USDT (TRC-20)\n成功充值：+${points} 點數\n當前點數餘額：${user.points} pt`);
+      renderMarketUI();
+      alert(`🎉 成功充值 +${pts} 點數！當前餘額：${user.points} pt`);
     };
 
-    // 發布新帖 (扣除 100 點數，校驗獨立職人名額)
     window.handlePublishSubmit = function(e) {
       e.preventDefault();
       const user = getCurrentUser();
       if (!user) return openAuthModal();
 
-      if (user.role === 'Explorer') {
-        return alert('探索者為純消費者階級，無法發布服務特約。請註冊或切換為「獨立職人」或「認證中介」。');
-      }
-
-      const posts = getPosts();
-
-      // 獨立職人名額限制：最多只能有 1 個有效帖子
       if (user.role === 'IndependentPro') {
-        const myActive = posts.filter(p => p.author === user.username && p.remainingHours > 0);
-        if (myActive.length >= 1) {
-          return alert('【配額限制】獨立職人賬號最多同時發布 1 則有效特約！如需多發，請切換至「認證中介」賬號。');
+        const posts = getPosts();
+        if (posts.filter(p => p.author === user.username).length >= 1) {
+          return alert('【配額限制】獨立職人限發布 1 則特約！如需多發請註冊中介賬號。');
         }
       }
 
-      if (user.points < 100) {
-        alert('點數不足！發布需要 100 點數。');
-        closePublishModal();
-        return openRechargeModal();
-      }
+      if (user.points < 100) return alert('點數不足！發布特約需扣除 100 點數。');
 
       user.points -= 100;
       setCurrentUser(user);
 
-      const newPost = {
+      const posts = getPosts();
+      posts.unshift({
         id: 'post_' + Date.now(),
         author: user.username,
         role: user.role,
         title: document.getElementById('pub-title').value,
-        desc: '用戶自行發布之特約服務資訊。',
+        desc: document.getElementById('pub-desc').value,
+        budget: document.getElementById('pub-price').value,
         location: document.getElementById('pub-location').value,
-        price: document.getElementById('pub-price').value,
         phone: document.getElementById('pub-phone').value,
         tg: document.getElementById('pub-tg').value,
         remainingHours: 120,
+        createdAt: Date.now(),
         isPinned: false,
-        lastBumpedAt: Date.now()
-      };
-
-      posts.unshift(newPost);
+        lastBumpedAt: Date.now(),
+        media: [
+          { type: 'video', thumb: 'https://images.unsplash.com/photo-1541532713592-79a0317b6b77?w=300&q=80', dur: '0:15' },
+          { type: 'img', thumb: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=300&q=80' },
+          { type: 'img', thumb: 'https://images.unsplash.com/photo-1517841905240-472988babdf9?w=300&q=80' },
+          { type: 'img', thumb: 'https://images.unsplash.com/photo-1524504388940-b1c1722653e1?w=300&q=80' }
+        ]
+      });
       savePosts(posts);
 
       closePublishModal();
-      renderUI();
-      alert(`發布成功！扣除 100 點數，有效期 120 小時已開始倒數。剩餘點數：${user.points}`);
+      renderMarketUI();
+      alert('發布成功！扣除 100 點數，120 小時時效監控已啟動。');
     };
 
-    // ==========================================
-    // 登入 / 註冊 / 安全問題表單處理
-    // ==========================================
-
-    window.openAuthModal = function() {
-      document.getElementById('auth-modal').classList.remove('hidden');
-      switchAuthTab('login');
-      generateCaptcha();
-    };
+    // 認證表單支持
+    window.openAuthModal = function() { document.getElementById('auth-modal').classList.remove('hidden'); switchAuthTab('login'); };
     window.closeAuthModal = function() { document.getElementById('auth-modal').classList.add('hidden'); };
     window.openRechargeModal = function() { document.getElementById('recharge-modal').classList.remove('hidden'); };
     window.closeRechargeModal = function() { document.getElementById('recharge-modal').classList.add('hidden'); };
-    window.openPublishModal = function() {
-      if (!getCurrentUser()) return openAuthModal();
-      document.getElementById('publish-modal').classList.remove('hidden');
-    };
+    window.openPublishModal = function() { if(!getCurrentUser()) return openAuthModal(); document.getElementById('publish-modal').classList.remove('hidden'); };
     window.closePublishModal = function() { document.getElementById('publish-modal').classList.add('hidden'); };
+    window.scrollToMarketTop = function() { window.scrollTo({ top: 0, behavior: 'smooth' }); };
 
-    window.switchAuthTab = function(tab) {
-      document.getElementById('form-login').classList.toggle('hidden', tab !== 'login');
-      document.getElementById('form-register').classList.toggle('hidden', tab !== 'register');
-      document.getElementById('form-forgot').classList.toggle('hidden', tab !== 'forgot');
-      document.getElementById('quick-login-hints').classList.toggle('hidden', tab !== 'login');
-
-      document.getElementById('tab-login-btn').className = tab === 'login' ? 'flex-1 pb-1 text-amber-400 border-b-2 border-amber-400' : 'flex-1 pb-1 text-slate-400';
-      document.getElementById('tab-register-btn').className = tab === 'register' ? 'flex-1 pb-1 text-amber-400 border-b-2 border-amber-400' : 'flex-1 pb-1 text-slate-400';
-      document.getElementById('tab-forgot-btn').className = tab === 'forgot' ? 'flex-1 pb-1 text-amber-400 border-b-2 border-amber-400' : 'flex-1 pb-1 text-slate-400';
+    window.switchAuthTab = function(t) {
+      document.getElementById('form-login').classList.toggle('hidden', t !== 'login');
+      document.getElementById('form-register').classList.toggle('hidden', t !== 'register');
+      document.getElementById('form-forgot').classList.toggle('hidden', t !== 'forgot');
+      document.getElementById('quick-login-hints').classList.toggle('hidden', t !== 'login');
+      ['login','register','forgot'].forEach(x => {
+        document.getElementById(`tab-${x}-btn`).className = x === t ? 'flex-1 pb-1 text-amber-400 border-b-2 border-amber-400' : 'flex-1 pb-1 text-slate-400';
+      });
     };
 
     window.fillTestAccount = function(u, p) {
@@ -838,17 +1050,11 @@
       e.preventDefault();
       const u = document.getElementById('login-username').value.trim();
       const p = document.getElementById('login-password').value.trim();
-      const users = getUsers();
-      const target = users.find(x => x.username === u && x.password === p);
-
-      if (!target) {
-        return alert('帳號或密碼錯誤！\n如果是新測試，可點擊上方黃色快捷鍵直接填入預設帳號。');
-      }
-
+      const target = getUsers().find(x => x.username === u && x.password === p);
+      if (!target) return alert('帳號或密碼錯誤！');
       setCurrentUser(target);
       closeAuthModal();
-      renderUI();
-      alert(`歡迎回來，${target.username}！\n已成功解鎖市集通訊聯絡方式與專屬點數。`);
+      renderMarketUI();
     };
 
     window.handleRegisterSubmit = function(e) {
@@ -858,76 +1064,41 @@
       const role = document.getElementById('reg-role').value;
       const secQ = document.getElementById('reg-sec-question').value;
       const secA = document.getElementById('reg-sec-answer').value.trim();
-      const captchaIn = document.getElementById('reg-captcha-input').value.trim();
-      const captchaExpected = document.getElementById('reg-captcha-display').textContent.trim();
-
-      if (captchaIn !== captchaExpected) {
-        alert('圖形驗證碼不正確，請重新輸入！');
-        generateCaptcha();
-        return;
-      }
-
       const users = getUsers();
-      if (users.some(x => x.username === u)) {
-        return alert('此用戶名已被註冊，請換一個！');
-      }
+      if (users.some(x => x.username === u)) return alert('該用戶名已存在！');
 
-      let initPoints = 100;
-      if (role === 'Agency') initPoints = 500;
-      else if (role === 'IndependentPro') initPoints = 200;
-      else if (role === 'Connoisseur') initPoints = 300;
-
-      const newUser = { username: u, password: p, role: role, points: initPoints, secQ: secQ, secA: secA };
+      const newUser = { username: u, password: p, role: role, points: 200, secQ, secA };
       users.push(newUser);
       saveUsers(users);
-
       setCurrentUser(newUser);
       closeAuthModal();
-      renderUI();
-      alert(`🎉 註冊成功！已自動登入。\n身分：${getRoleName(role)}\n贈送新手體驗點數：${initPoints} pt！`);
+      renderMarketUI();
     };
 
     window.handleForgotSubmit = function(e) {
       e.preventDefault();
       const u = document.getElementById('forgot-username').value.trim();
       const a = document.getElementById('forgot-answer').value.trim();
-      const newP = document.getElementById('forgot-newpass').value.trim();
-
+      const np = document.getElementById('forgot-newpass').value.trim();
       const users = getUsers();
       const target = users.find(x => x.username === u);
-
-      if (!target) {
-        return alert('找不到該用戶名！');
-      }
-
-      if (target.secA !== a) {
-        return alert('安全問題答案錯誤！核驗失敗。');
-      }
-
-      target.password = newP;
+      if (!target || target.secA !== a) return alert('安全驗證失敗！答案錯誤。');
+      target.password = np;
       saveUsers(users);
-      alert('密碼重設成功！請使用新密碼登入。');
+      alert('密碼重設成功！');
       switchAuthTab('login');
-      document.getElementById('login-username').value = u;
-      document.getElementById('login-password').value = newP;
     };
 
     window.handleLogout = function() {
       setCurrentUser(null);
-      renderUI();
-      alert('已成功登出，已切換回訪客遮蔽模式。');
+      closeMyCenterModal();
+      renderMarketUI();
+      alert('已退出登入。');
     };
 
-    function generateCaptcha() {
-      const code = Math.floor(1000 + Math.random() * 9000);
-      const el = document.getElementById('reg-captcha-display');
-      if (el) el.textContent = code;
-    }
-
-    // 初始化啟動
-    initDatabase();
+    initDb();
     if (sessionStorage.getItem('stealth_unlocked') === 'true') {
-      window.initMarketplaceEngine();
+      window.initMarketplace();
     }
   </script>
 </body>
